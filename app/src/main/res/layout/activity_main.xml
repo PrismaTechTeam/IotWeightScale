@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+
+    <TextView
+        android:id="@+id/tvNetWeight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="100sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnZero"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#39EC20"
+            android:text="To Zero"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+
+
+        <Button
+            android:id="@+id/btnTare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:background="#39EC20"
+            android:text="Deduction"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:background="#39EC20"
+            android:text="Configure"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="false"
+        android:layout_centerVertical="true"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tv_battery_per"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="88%"
+            android:textColor="@android:color/white"
+            android:textSize="24sp" />
+
+        <com.tbossgroup.scale.BatteryView
+            android:id="@+id/img_battery"
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            android:layout_margin="10dp" />
+
+    </LinearLayout>
+
+
+    <Button
+        android:id="@+id/button_send_weight"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
+        android:background="#E9F622"
+        android:text="Send Weight"
+        android:textSize="20sp"
+
+        android:textColor="@android:color/black" />
+
+    <ImageButton
+        android:id="@+id/buttonSettings"
+        android:layout_width="76dp"
+        android:layout_height="72dp"
+        android:scaleType="fitCenter"
+
+
+        android:translationX="-350dp"
+        android:translationY="-300dp"
+        app:srcCompat="@drawable/settings"
+        android:backgroundTint="@android:color/transparent"/>
+
+
+</LinearLayout>
+
+
+
+

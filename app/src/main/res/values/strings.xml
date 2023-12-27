@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">IOT Weight Scale</string>
+    <string name="text_hint">Enter API URL</string>
+</resources>
