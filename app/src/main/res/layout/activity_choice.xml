@@ -30,8 +30,7 @@
             android:layout_width="200dp"
             android:layout_height="50dp"
             android:background="@android:color/white"
-            android:layout_margin="10dp"
-            android:entries="@array/machine_array"/>
+            android:layout_margin="10dp"/>
 
 
 
