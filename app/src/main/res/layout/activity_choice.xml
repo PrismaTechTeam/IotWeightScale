@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="69dp"
+        android:layout_height="98dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/back"
+        android:translationX="-230dp"
+        android:translationY="-100dp"
+        android:backgroundTint="@android:color/transparent"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <!-- Spinner for selecting weight machine -->
+        <Spinner
+            android:id="@+id/machine_spinner"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:background="@android:color/white"
+            android:layout_margin="10dp"
+            android:entries="@array/machine_array"/>
+
+
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/selectMachine"
+        android:layout_width="110dp"
+        android:layout_height="50dp"
+        android:background="#39EC20"
+        android:text="Select" />
+
+
+</LinearLayout>
