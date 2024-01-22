@@ -1,6 +1,5 @@
 package com.tbossgroup.scale;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,7 +24,30 @@ import java.util.List;
 public class ActivityChoice extends AppCompatActivity {
     private Spinner machineSpinner;
     private Button selectMachineButton;
-    private String selectedMachine; // This will hold the selected machine
+    private Device selectedDevice;
+
+    public static class Device {
+        private String deviceName;
+        private int workCentreId;
+
+        public Device(String deviceName, int workCentreId) {
+            this.deviceName = deviceName;
+            this.workCentreId = workCentreId;
+        }
+
+        public String getDeviceName() {
+            return deviceName;
+        }
+
+        public int getWorkCentreId() {
+            return workCentreId;
+        }
+
+        @Override
+        public String toString() {
+            return deviceName; // For displaying in the spinner
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,59 +57,44 @@ public class ActivityChoice extends AppCompatActivity {
         machineSpinner = findViewById(R.id.machine_spinner);
         selectMachineButton = findViewById(R.id.selectMachine);
 
-        // Initially disable the button until we have the machines loaded
         selectMachineButton.setEnabled(false);
 
-        // Set up the spinner selection listener
         machineSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedMachine = parent.getItemAtPosition(position).toString();
+                selectedDevice = (Device) parent.getItemAtPosition(position);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                selectedMachine = null; // Clear selection
+                selectedDevice = null;
             }
         });
 
-        // Start the async task to fetch devices
         new FetchDevicesTask().execute();
 
         selectMachineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Check if a machine is selected
-                if (selectedMachine != null) {
-                    saveMachineSelection(selectedMachine);
-                    // You can start another activity or perform other actions here
+                if (selectedDevice != null) {
+                    saveMachineSelection(selectedDevice);
+                    Toast.makeText(ActivityChoice.this, "Machine Selected: " + selectedDevice.getDeviceName(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
-    private class FetchDevicesTask extends AsyncTask<Void, Void, List<String>> {
+    private class FetchDevicesTask extends AsyncTask<Void, Void, List<Device>> {
         private boolean errorOccurred = false;
 
         @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Show a loading message or spinner (not implemented here)
-        }
-
-        @Override
-        protected List<String> doInBackground(Void... voids) {
-            List<String> devices = new ArrayList<>();
+        protected List<Device> doInBackground(Void... voids) {
+            List<Device> devices = new ArrayList<>();
             try {
-                // The exact URL for your API
                 URL url = new URL("http://192.168.1.137:4554/api/iotDevices/list");
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                connection.setRequestProperty("accept", "text/plain");
-                connection.setRequestProperty("Content-Type", "application/json; utf-8");
                 connection.setRequestProperty("Accept", "application/json");
-                connection.setDoOutput(true);
-
 
                 int responseCode = connection.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -99,12 +106,12 @@ public class ActivityChoice extends AppCompatActivity {
                     }
                     reader.close();
 
-                    // Assuming your API returns a JSON array of objects
                     JSONArray jsonArray = new JSONArray(response.toString());
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        // Extract device name
-                        devices.add(jsonObject.getString("DeviceName"));
+                        String deviceName = jsonObject.getString("deviceName");
+                        int workCentreId = jsonObject.getInt("workCentreId");
+                        devices.add(new Device(deviceName, workCentreId));
                     }
                 } else {
                     errorOccurred = true;
@@ -116,27 +123,26 @@ public class ActivityChoice extends AppCompatActivity {
             return devices;
         }
 
-
         @Override
-        protected void onPostExecute(List<String> devices) {
+        protected void onPostExecute(List<Device> devices) {
             super.onPostExecute(devices);
             if (errorOccurred) {
                 Toast.makeText(ActivityChoice.this, "Failed to fetch devices", Toast.LENGTH_LONG).show();
-                return;
+            } else {
+                ArrayAdapter<Device> adapter = new ArrayAdapter<>(ActivityChoice.this, android.R.layout.simple_spinner_item, devices);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                machineSpinner.setAdapter(adapter);
+                selectMachineButton.setEnabled(true);
             }
-            // Set up the adapter with the fetched devices
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(ActivityChoice.this, android.R.layout.simple_spinner_item, devices);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            machineSpinner.setAdapter(adapter);
-            selectMachineButton.setEnabled(true); // Enable the button now that we have the list
         }
     }
 
-    private void saveMachineSelection(String machine) {
-        // Save the selected machine name to SharedPreferences
+    private void saveMachineSelection(Device device) {
         SharedPreferences sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("DefaultMachine", machine);
+        editor.putString("DefaultMachine", device.getDeviceName());
+        editor.putInt("DefaultWorkCentreId", device.getWorkCentreId());
         editor.apply();
     }
+
 }

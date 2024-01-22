@@ -32,34 +32,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Upgrade logic goes here
     }
 
-    public static class Device {
-        private String name;
-        private int id;
-
-        public Device(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        @Override
-        public String toString() {
-            return name; // This will ensure the ArrayAdapter shows the device name
-        }
-    }
 
 
 
 
-    public List<Device> getDeviceNames(){
-        List<Device> devices = new ArrayList<>();
+
+    public List<ActivityChoice.Device> getDeviceNames(){
+        List<ActivityChoice.Device> devices = new ArrayList<>();
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -76,7 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             while (resultSet.next()) {
                 int id = resultSet.getInt("Id");
                 String name = resultSet.getString("DeviceName");
-                devices.add(new Device(id, name));
+                devices.add(new ActivityChoice.Device(name, id));
             }
         } catch (Exception e) {
             e.printStackTrace(); // Handle exceptions appropriately

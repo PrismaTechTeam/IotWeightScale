@@ -182,6 +182,10 @@ public class MainActivity extends AppCompatActivity {
                     String uom = "kg"; // Unit of measurement, e.g., kg, lbs
                     String date = getCurrentDate(); // Implement this method to get the current date in the required format
 
+
+
+
+
                     sendWeightToDatabase(weight, uom, date);
                     Toast.makeText(getApplicationContext(), "Successfully Added to Database", Toast.LENGTH_SHORT).show();
                     System.out.print(weight);
@@ -223,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
         return sharedPreferences.getString("API_ADDRESS", ""); // Replace with a default API address if necessary
     }
+
 
 
 
@@ -431,6 +436,10 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
+
+
     //API connection
     private void sendWeightToDatabase(final double weight, final String uom, final String date) {
         new AsyncTask<Void, Void, Void>() {
@@ -454,6 +463,7 @@ public class MainActivity extends AppCompatActivity {
                     jsonParam.put("weight", weight);
                     jsonParam.put("uom", uom);
                     jsonParam.put("date", date);
+
 
 
                     try(OutputStream os = conn.getOutputStream()) {
