@@ -182,11 +182,17 @@ public class MainActivity extends AppCompatActivity {
                     String uom = "kg"; // Unit of measurement, e.g., kg, lbs
                     String date = getCurrentDate(); // Implement this method to get the current date in the required format
 
+                    int iotDeviceId;
+                    iotDeviceId = getIotDeviceId();
 
+                    if (iotDeviceId != -1) {
+                        sendWeightToDatabase(weight, uom, date, iotDeviceId);
+                        Toast.makeText(MainActivity.this, "Sending weight to database...", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "No IoT Device ID found.", Toast.LENGTH_SHORT).show();
+                    }
 
-
-
-                    sendWeightToDatabase(weight, uom, date);
+                    sendWeightToDatabase(weight, uom, date, iotDeviceId);
                     Toast.makeText(getApplicationContext(), "Successfully Added to Database", Toast.LENGTH_SHORT).show();
                     System.out.print(weight);
 
@@ -432,6 +438,12 @@ public class MainActivity extends AppCompatActivity {
         return dateFormat.format(now);
     }
 
+    private int getIotDeviceId() {
+        SharedPreferences sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        return sharedPreferences.getInt("DefaultWorkCentreId", -1); // Return -1 if not found
+    }
+
+
 
 
 
@@ -441,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     //API connection
-    private void sendWeightToDatabase(final double weight, final String uom, final String date) {
+    private void sendWeightToDatabase(final double weight, final String uom, final String date, final int iotDeviceId) {
         new AsyncTask<Void, Void, Void>() {
             @SuppressLint("StaticFieldLeak")
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -451,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
 
                     String apiUrl = getApiAddress();
 
-                   // URL url = new URL("http://192.168.1.92:7025/api/WeightReading");
+                    //URL url = new URL("http://192.168.1.92:7025/api/WeightReading");
                     URL url = new URL(apiUrl);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
@@ -463,6 +475,7 @@ public class MainActivity extends AppCompatActivity {
                     jsonParam.put("weight", weight);
                     jsonParam.put("uom", uom);
                     jsonParam.put("date", date);
+                    jsonParam.put("iotDeviceId", iotDeviceId);
 
 
 
