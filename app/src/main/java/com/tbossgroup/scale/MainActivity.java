@@ -85,6 +85,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int WAHT_REFRESH_UI = 1;
     private static final int WAHT_SERVICE_CONNECTION = 2;
 
+    public interface ApiCallback {
+        void onSuccess();
+        void onFailure();
+    }
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -171,6 +176,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private void handleButtonClick(final Button sendButton) {
+                Toast.makeText(MainActivity.this, "Sending weight to database...", Toast.LENGTH_SHORT).show();
+
                 clickCount++;
                 totalClicks++;
 
@@ -186,25 +193,34 @@ public class MainActivity extends AppCompatActivity {
                     iotDeviceId = getIotDeviceId();
 
                     if (iotDeviceId != -1) {
-                        sendWeightToDatabase(weight, uom, date, iotDeviceId);
-                        Toast.makeText(MainActivity.this, "Sending weight to database...", Toast.LENGTH_SHORT).show();
+
+                        sendWeightToDatabase(weight, uom, date, iotDeviceId, new ApiCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Toast.makeText(getApplicationContext(), "Successfully Added to Database", Toast.LENGTH_SHORT).show();
+
+                                // Play sound
+                                MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.sound);
+                                mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mp) {
+                                        mp.release();
+                                    }
+                                });
+                                mp.start();
+                            }
+
+                            @Override
+                            public void onFailure() {
+                                Toast.makeText(getApplicationContext(), "Failed to Add to Database", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     } else {
                         Toast.makeText(MainActivity.this, "No IoT Device ID found.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
 
-                    sendWeightToDatabase(weight, uom, date, iotDeviceId);
-                    Toast.makeText(getApplicationContext(), "Successfully Added to Database", Toast.LENGTH_SHORT).show();
-                    System.out.print(weight);
 
-                    // Play sound
-                    MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.sound);
-                    mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            mp.release();
-                        }
-                    });
-                    mp.start();
                 } else {
                     sendButton.setEnabled(false); // Disable the button after 20 total clicks
                     minuteHandler.removeCallbacks(minuteRunnable); // Stop resetting after 1 minute
@@ -453,18 +469,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     //API connection
-    private void sendWeightToDatabase(final double weight, final String uom, final String date, final int iotDeviceId) {
-        new AsyncTask<Void, Void, Void>() {
+// Adjust the method signature to include the ApiCallback parameter
+    private void sendWeightToDatabase(final double weight, final String uom, final String date, final int iotDeviceId, final ApiCallback callback) {
+        new AsyncTask<Void, Void, Boolean>() {
             @SuppressLint("StaticFieldLeak")
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
-            protected Void doInBackground(Void... voids) {
+            protected Boolean doInBackground(Void... voids) {
                 try {
-
                     String apiUrl = getApiAddress();
-
-                    //URL url = new URL("http://192.168.1.92:7025/api/WeightReading");
-                    URL url = new URL(apiUrl);
+                    URL url = new URL(apiUrl + "/WeightReading");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json; utf-8");
@@ -477,35 +490,34 @@ public class MainActivity extends AppCompatActivity {
                     jsonParam.put("date", date);
                     jsonParam.put("iotDeviceId", iotDeviceId);
 
-
-
-                    try(OutputStream os = conn.getOutputStream()) {
+                    try (OutputStream os = conn.getOutputStream()) {
                         byte[] input = jsonParam.toString().getBytes("utf-8");
                         os.write(input, 0, input.length);
                     }
 
-                    try(BufferedReader br = new BufferedReader(
-                            new InputStreamReader(conn.getInputStream(), "utf-8"))) {
-                        StringBuilder response = new StringBuilder();
-                        String responseLine;
-                        while ((responseLine = br.readLine()) != null) {
-                            response.append(responseLine.trim());
-                        }
-                        Log.i("API Response", response.toString());
-
-                    }
-
+                    // Check response code to determine success
+                    int responseCode = conn.getResponseCode();
                     conn.disconnect();
+
+                    // Consider 2xx status codes as success
+                    return (responseCode >= 200 && responseCode < 300);
+
                 } catch (Exception e) {
                     e.printStackTrace();
-
+                    return false;
                 }
-                return null;
+            }
 
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if (result) {
+                    callback.onSuccess();
+                } else {
+                    callback.onFailure();
+                }
             }
         }.execute();
     }
-
 
 
 
